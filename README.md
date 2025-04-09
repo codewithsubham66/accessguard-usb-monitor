@@ -26,7 +26,7 @@ A Python-based security application to detect unauthorized USB access, monitor f
 ## 🖼️ Screenshots
 
 ### 🏠 GUI Home Screen
-![GUI Home](screenshots/Gui_home.png)
+![GUI Home](screenshots/gui_home.png)
 
 ### ⚠️ USB Alert Detected
 ![USB Alert](screenshots/USB_detection.png)
