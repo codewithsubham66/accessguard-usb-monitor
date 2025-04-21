@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AccessGuard | USB Security</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: rgb(33, 33, 71);
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+    .upper_part {
+      text-align: center;
+      padding: 20px;
+    }
+    .AccDrow {
+      font-size: 48px;
+      margin: 0;
+    }
+    .USBDrow {
+      font-size: 28px;
+      margin: 10px 0;
+    }
+    .ParaDrow {
+      font-size: 18px;
+      color: #ccc;
+    }
+    .center_part {
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+    .left_part {
+      margin-right: 50px;
+    }
+    .method {
+      margin: 10px 0;
+      font-size: 18px;
+    }
+    .right_part {
+      background-color: rgb(27, 27, 114);
+      padding: 20px;
+      border-radius: 8px;
+      width: 400px;
+    }
+    .border {
+      background-color: rgb(125, 199, 200);
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .border h4 {
+      margin: 0;
+      color: rgb(35, 35, 122);
+    }
+    .common {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    .start, .stop, .whitelist {
+      width: 80%;
+      margin: 8px auto;
+      display: block;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .start {
+      background-color: #28a745;
+      color: white;
+    }
+    .stop {
+      background-color: #dc3545;
+      color: white;
+    }
+    .whitelist {
+      background-color: #007bff;
+      color: white;
+    }
+    .monitoring {
+      text-align: center;
+      font-size: 14px;
+      color: lightgreen;
+      margin-top: 10px;
+    }
+    footer {
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+    .source, .download {
+      margin: 0 15px;
+      width: 200px;
+      height: 44px;
+      font-size: 18px;
+      color: white;
+      background-color: rgb(8, 8, 91);
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="upper_part">
+    <h2 class="AccDrow">💻 AccessGuard</h2>
+    <h3 class="USBDrow">USB & File Monitoring System</h3>
+    <h4 class="ParaDrow">Secure your workspace by detecting unauthorized USB devices and monitoring file access.</h4>
+  </header>
+
+  <div class="center_part">
+    <div class="left_part">
+      <p class="method">✅ USB Detection</p>
+      <p class="method">📁 File Monitoring</p>
+      <p class="method">✉ Email Alerts</p>
+      <p class="method">📮 GUI Interface</p>
+    </div>
+
+    <div class="right_part">
+      <div class="border">
+        <h4>📊 File Monitoring Dashboard</h4>
+      </div>
+      <h2 class="common">Welcome to AccessGuard!</h2>
+      <button class="start">▶ Start Monitoring</button>
+      <button class="stop">⏹ Stop Monitoring</button>
+      <button class="whitelist">🔒 Toggle Whitelist</button>
+      <h3 class="monitoring">Status: Not Monitoring</h3>
+    </div>
+  </div>
+
+  <footer>
+    <button class="source" onclick="window.open('https://github.com/codewithsubham66/accessguard-usb-monitor')">☞ View Source Code</button>
+    <button class="download" onclick="window.open('https://github.com/codewithsubham66/accessguard-usb-monitor/raw/main/accessguard_code.zip')">📩 Download</button>
+  </footer>
+
+</body>
+</html>

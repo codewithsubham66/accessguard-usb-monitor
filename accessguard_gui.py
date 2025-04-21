@@ -7,30 +7,38 @@ from datetime import datetime
 import time
 import threading
 import tkinter as tk
+import winsound
 
 sender_email = "accessguard.file@gmail.com"
-app_password = "qwfx jdmw cane tgev"  
-recipient_email = "8904subhamd@gmail.com"  
+app_password = "qwfx jdmw cane tgev"
+recipient_email = "8904subhamd@gmail.com"
 
-system_id = os.environ.get("COMPUTERNAME", "HP Pavilion Laptop 15")  
-user_id = os.environ.get("USERNAME", "LAPTOP-48T8EO3C")  
+system_id = os.environ.get("COMPUTERNAME", "HP Pavilion Laptop 15")
+user_id = os.environ.get("USERNAME", "LAPTOP-48T8EO3C")
+log_file_name = "accessguard_log.txt"
+monitored_folder = "D:\\usb detection project"
 
-#  This is the Function to send  email
+# Log writing function
+def log_activity(message):
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open(log_file_name, "a") as log_file:
+        log_file.write(f"{timestamp} - {message}\n")
+
+# Send email alerts
 def send_email(subject, body):
     message = MIMEMultipart()
     message["From"] = sender_email
     message["To"] = recipient_email
     message["Subject"] = subject
 
-    # this is the  HTML code to format the email content
     html_body = f"""
     <html>
       <body>
-        <h2 style="color: red;">AccessGuard Alert</h2>
+        <h2 style=\"color: red;\">AccessGuard Alert</h2>
         <p>
-          <strong style="color: darkred;">System ID:</strong> {system_id}<br>
-          <strong style="color: darkred;">User ID:</strong> {user_id}<br>
-          <strong style="color: darkred;">Timestamp:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}<br>
+          <strong style=\"color: darkred;\">System ID:</strong> {system_id}<br>
+          <strong style=\"color: darkred;\">User ID:</strong> {user_id}<br>
+          <strong style=\"color: darkred;\">Timestamp:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}<br>
         </p>
         <p>{body}</p>
         <p>Please verify the action and ensure no unauthorized activity occurs.</p>
@@ -48,14 +56,15 @@ def send_email(subject, body):
     except Exception as e:
         print(f"Failed to send email: {e}")
 
-#  This is the Function to display a professional alert box
+# Pop-up alert
+
 def show_classical_alert(title, message):
+    winsound.Beep(1000, 200)
     popup = tk.Toplevel()
     popup.title(title)
     popup.geometry("400x200")
-    popup.resizable(False, False)  
-
-    popup.config(bg="#F0F0F0")  
+    popup.resizable(False, False)
+    popup.config(bg="#F0F0F0")
 
     title_label = tk.Label(
         popup, text=title, font=("Helvetica", 16, "bold"), fg="#333333", bg="#F0F0F0"
@@ -67,7 +76,6 @@ def show_classical_alert(title, message):
     )
     message_label.pack(padx=20, pady=(0, 20))
 
-    # OK Button
     close_button = tk.Button(
         popup,
         text="Clear!",
@@ -85,13 +93,11 @@ def show_classical_alert(title, message):
     popup.grab_set()
     popup.focus_force()
 
+# Main detection logic
 def detect_usb_and_monitor_files(status_label, stop_event):
     initial_devices = {part.device for part in psutil.disk_partitions()}
     print("Monitoring for USB device insertion...")
 
-    monitored_folder = "D:\\usb detection project"
-
-    # Initialize file state with the folder's current contents
     try:
         files_state = {file: os.stat(os.path.join(monitored_folder, file)).st_mtime
                        for file in os.listdir(monitored_folder)}
@@ -100,16 +106,14 @@ def detect_usb_and_monitor_files(status_label, stop_event):
         print(f"Folder {monitored_folder} not found for monitoring.")
 
     while not stop_event.is_set():
-        #This code is for Detect new USB devices
         current_devices = {part.device for part in psutil.disk_partitions()}
         new_devices = current_devices - initial_devices
 
         if new_devices:
             for device in new_devices:
-                body = f"A new USB device has been inserted: {device}."
-                send_email("USB Device Inserted", body)
-                show_classical_alert("USB Detected", f"New USB device detected: {device}")
-
+                log_activity(f"New USB device detected: {device}")
+                send_email("USB Device Inserted", f"New USB device inserted: {device}")
+                show_classical_alert("USB Device Inserted", f"New USB device detected: {device}")
         initial_devices = current_devices
 
         try:
@@ -117,33 +121,38 @@ def detect_usb_and_monitor_files(status_label, stop_event):
                                    for file in os.listdir(monitored_folder)}
 
             for file, last_modified in current_files_state.items():
-                if file not in files_state:
-                
-                    body = f"A new file has been added: {file}.\nFile path: {os.path.join(monitored_folder, file)}"
-                    send_email("New File Detected", body)
-                    show_classical_alert("File Added", f"New file detected: {file}")
+                if file == log_file_name:
+                    continue
 
+                if file not in files_state:
+                    log_activity(f"New file detected: {file}")
+                    send_email("New File Detected", f"New file added: {file}")
+                    show_classical_alert("New File Added", f"New file detected: {file}")
                 elif files_state[file] != last_modified:
-                    # This is the Alert for a modified file
-                    body = f"The file {file} has been modified.\nFile path: {os.path.join(monitored_folder, file)}"
-                    send_email("File Modified", body)
+                    log_activity(f"File modified: {file}")
+                    send_email("File Modified", f"File modified: {file}")
                     show_classical_alert("File Modified", f"File modified: {file}")
 
-            # Update files state
+            for file in files_state.keys():
+                if file not in current_files_state and file != log_file_name:
+                    log_activity(f"File deleted: {file}")
+                    send_email("File Deleted", f"File deleted: {file}")
+                    show_classical_alert("File Deleted", f"File deleted: {file}")
+
             files_state = current_files_state
 
         except FileNotFoundError:
             print(f"Folder {monitored_folder} not found for monitoring.")
 
         time.sleep(5)
-
-# This is the GUI Application with using Tkinter
+    
+# GUI Application class
 class AccessGuardApp:
     def __init__(self, root):
         self.root = root
         self.root.title("AccessGuard - Monitoring System")
         self.root.geometry("500x300")
-        self.root.config(bg="#2E3B4E")  
+        self.root.config(bg="#2E3B4E")
         self.is_monitoring = False
         self.monitoring_thread = None
         self.stop_event = threading.Event()
@@ -190,7 +199,7 @@ class AccessGuardApp:
             self.start_button.config(state=tk.NORMAL)
             self.stop_button.config(state=tk.DISABLED)
 
-# this is the code for Running  the Tkinter app
+# Run the GUI
 if __name__ == "__main__":
     root = tk.Tk()
     app = AccessGuardApp(root)
