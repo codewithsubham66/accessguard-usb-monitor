@@ -5,6 +5,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 import time
+import subprocess  # Required for retrieving USB serial numbers
 
 # Email Config
 sender_email = "accessguard.file@gmail.com"
@@ -16,6 +17,7 @@ user_id = os.environ.get("USERNAME", "LAPTOP-48T8EO3C")
 
 monitored_folder = "D:\\usb detection project"
 files_state = {}
+WHITELIST_FILE = "usb_whitelist.txt"  # Ensure this file exists with whitelisted serials
 
 # Log Function
 def write_log(message):
@@ -54,7 +56,35 @@ def send_email(subject, body):
         print(f"❌ Email failed: {e}")
         write_log(f"[EMAIL FAILED] {subject} | Error: {e}")
 
-# Main Function
+# Check if USB device is whitelisted
+def is_whitelisted(serial_number):
+    try:
+        with open(WHITELIST_FILE, "r") as file:
+            whitelisted = [line.strip() for line in file if line.strip()]
+        return serial_number in whitelisted
+    except FileNotFoundError:
+        print("Whitelist file not found.")
+        return False
+
+# Get USB Serial Numbers (Function Added)
+def get_usb_serials():
+    """Retrieve the serial numbers of connected USB devices using WMIC."""
+    try:
+        result = subprocess.check_output('wmic diskdrive get DeviceID,SerialNumber,InterfaceType', shell=True).decode()
+        lines = result.strip().split('\n')[1:]
+        serials = {}
+        for line in lines:
+            if 'USB' in line:
+                parts = line.strip().split()
+                if len(parts) >= 2:
+                    serial = parts[-1]
+                    serials[serial] = parts[0]  # mapping serial to device ID
+        return serials
+    except Exception as e:
+        print(f"❗ Failed to get USB serials: {e}")
+        return {}
+
+# Main Function to Detect USB and Monitor Files
 def detect_usb_and_monitor_files():
     print("🔄 AccessGuard Running... Waiting for USBs and File Changes")
     initial_devices = {part.device for part in psutil.disk_partitions()}
@@ -65,9 +95,23 @@ def detect_usb_and_monitor_files():
         new_devices = current_devices - initial_devices
 
         for device in new_devices:
-            body = f"A new USB device has been inserted: <b>{device}</b>."
-            send_email("🔌 USB Device Detected", body)
-            write_log(f"[USB DETECTED] {device}")
+            # Retrieve the serial numbers of connected USB devices
+            serials = get_usb_serials()  # This function is now implemented
+            device_is_whitelisted = False
+            
+            for serial, dev_id in serials.items():
+                if is_whitelisted(serial):
+                    device_is_whitelisted = True
+                    break
+
+            if device_is_whitelisted:
+                body = f"A whitelisted USB device has been inserted: <b>{device}</b>."
+                send_email("🔌 Whitelisted USB Device Detected", body)
+                write_log(f"[USB DETECTED] Whitelisted device: {device}")
+            else:
+                body = f"An unauthorized USB device has been inserted: <b>{device}</b>."
+                send_email("🚨 Unauthorized USB Device Detected", body)
+                write_log(f"[USB DETECTED] Unauthorized device: {device}")
 
         initial_devices = current_devices
 

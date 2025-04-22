@@ -34,11 +34,11 @@ def send_email(subject, body):
     html_body = f"""
     <html>
       <body>
-        <h2 style=\"color: red;\">AccessGuard Alert</h2>
+        <h2 style="color: red;">AccessGuard Alert</h2>
         <p>
-          <strong style=\"color: darkred;\">System ID:</strong> {system_id}<br>
-          <strong style=\"color: darkred;\">User ID:</strong> {user_id}<br>
-          <strong style=\"color: darkred;\">Timestamp:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}<br>
+          <strong style="color: darkred;">System ID:</strong> {system_id}<br>
+          <strong style="color: darkred;">User ID:</strong> {user_id}<br>
+          <strong style="color: darkred;">Timestamp:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}<br>
         </p>
         <p>{body}</p>
         <p>Please verify the action and ensure no unauthorized activity occurs.</p>
@@ -57,7 +57,6 @@ def send_email(subject, body):
         print(f"Failed to send email: {e}")
 
 # Pop-up alert
-
 def show_classical_alert(title, message):
     winsound.Beep(1000, 200)
     popup = tk.Toplevel()
@@ -92,6 +91,18 @@ def show_classical_alert(title, message):
     popup.transient()
     popup.grab_set()
     popup.focus_force()
+
+# Get USB serial numbers
+def get_usb_serials():
+    serials = {}
+    for part in psutil.disk_partitions():
+        if 'usb' in part.device.lower():  # Check if it's a USB device
+            try:
+                # For demonstration, using device path as serial (adjust as necessary)
+                serials[part.device] = part.device
+            except Exception as e:
+                print(f"Failed to retrieve serial for {part.device}: {e}")
+    return serials
 
 # Main detection logic
 def detect_usb_and_monitor_files(status_label, stop_event):

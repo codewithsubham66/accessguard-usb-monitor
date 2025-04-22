@@ -9,7 +9,6 @@ import subprocess
 # -------- CONFIGURATION --------
 LOG_FILE = "usb_logs.txt"
 WHITELIST_FILE = "usb_whitelist.txt"
-WHITELIST_STATUS_FILE = "whitelist_status.txt"
 
 # Email setup
 SENDER_EMAIL = "accessguard.file@gmail.com"
@@ -36,7 +35,7 @@ def get_usb_devices():
     return devices
 
 def send_email_alert(device_name):
-    subject = "🚨 Unauthorized USB Detected!"
+    subject = "\ud83d\udea8 Unauthorized USB Detected!"
     body = f"An unauthorized USB device ({device_name}) was detected on the system at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}."
 
     message = MIMEMultipart()
@@ -50,9 +49,9 @@ def send_email_alert(device_name):
             server.starttls()
             server.login(SENDER_EMAIL, APP_PASSWORD)
             server.sendmail(SENDER_EMAIL, RECIPIENT_EMAIL, message.as_string())
-        print("📧 Email alert sent.")
+        print("\ud83d\udce7 Email alert sent.")
     except Exception as e:
-        print(f"❗ Failed to send email alert: {e}")
+        print(f"\u2757 Failed to send email alert: {e}")
 
 def get_usb_serials():
     try:
@@ -63,7 +62,9 @@ def get_usb_serials():
             if 'USB' in line:
                 parts = line.strip().split()
                 if len(parts) >= 2:
-                    serials[parts[0]] = parts[-1]
+                    device_id = parts[0]
+                    serial = parts[-1]
+                    serials[serial] = device_id  # reverse dictionary for easier lookup
         return serials
     except Exception as e:
         print(f"Failed to get serial numbers: {e}")
@@ -74,13 +75,6 @@ def is_whitelisted(serial_number):
         with open(WHITELIST_FILE, "r") as file:
             whitelisted = [line.strip() for line in file if line.strip()]
         return serial_number in whitelisted
-    except FileNotFoundError:
-        return False
-
-def is_whitelist_enabled():
-    try:
-        with open(WHITELIST_STATUS_FILE, "r") as f:
-            return f.read().strip().lower() == "enabled"
     except FileNotFoundError:
         return False
 
@@ -97,21 +91,24 @@ if __name__ == "__main__":
         new_devices = current_devices - previous_devices
         removed_devices = previous_devices - current_devices
 
+        if new_devices:
+            print("\ud83d\udcce New devices detected:", new_devices)
+
         serials = get_usb_serials()
-        whitelist_active = is_whitelist_enabled()
+        print("🔄 Monitoring for USB devices...")
 
         for device in new_devices:
-            serial = serials.get(device, "Unknown")
-            if whitelist_active:
+            found = False
+            for serial, dev_id in serials.items():
                 if is_whitelisted(serial):
-                    log_event("✅ Whitelisted USB Connected", f"{device} (Serial: {serial})")
-                else:
-                    log_event("❌ Unauthorized USB Detected", f"{device} (Serial: {serial})")
-                    send_email_alert(f"{device} (Serial: {serial})")
-            else:
-                log_event("🔌 USB Connected (Whitelist Disabled)", f"{device} (Serial: {serial})")
+                    log_event("\u2705 Whitelisted USB Connected", f"{device} (Serial: {serial})")
+                    found = True
+                    break
+            if not found:
+                log_event("\u274c Unauthorized USB Detected", f"{device} (No matching whitelisted serial)")
+                send_email_alert(f"{device} (No matching whitelisted serial)")
 
         for device in removed_devices:
-            log_event("📤 USB Removed", device)
+            log_event("\ud83d\udce4 USB Removed", device)
 
         previous_devices = current_devices

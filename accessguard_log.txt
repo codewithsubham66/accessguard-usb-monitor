@@ -1,14 +1,9 @@
-2025-04-21 01:39:07 - New file detected: spam
-2025-04-21 01:39:20 - New file detected: screenshots
-2025-04-21 01:39:27 - File deleted: screenshot
-2025-04-21 01:40:09 - File deleted: spam
-2025-04-21 01:41:25 - New USB device detected: F:\
-2025-04-21 01:43:18 - New file detected: New folder
-2025-04-21 01:43:27 - File deleted: New folder
-2025-04-21 09:35:32 - USB Inserted (Not Whitelisted): 03020320041524102307
-[2025-04-21 09:38:01] [INFO] Monitoring started.
-[2025-04-21 09:38:25] [EMAIL] Email sent: USB Device Alert
-[2025-04-21 09:38:25] [USB_UNAUTHORIZED] Unauthorized USB detected: 03020320041524102307
-[2025-04-21 09:38:46] [INFO] Monitoring stopped.
-2025-04-21 09:42:41 - USB Inserted (Whitelisted): 03020320041524102307
-2025-04-21 09:45:10 - USB Inserted (Not Whitelisted): 03020320041524102307
+2025-04-22 01:34:58 - New USB device detected: F:\
+2025-04-22 01:58:03 - New file detected: New folder
+2025-04-22 01:58:14 - File deleted: New folder
+2025-04-22 01:59:08 - New USB device detected: F:\
+2025-04-22 01:59:13 - New file detected: sd25-04-22 01:59:22 - File deleted: sd
+2025-04-22 10:54:47 - New USB device detected: F:\
+2025-04-22 11:24:26 - New file detected: spam
+2025-04-22 12:24:08 - New USB device detected: F:\
+2025-04-22 13:02:13 - New USB device detected: F:\
